@@ -1,0 +1,19 @@
+# Ignora arquivos e pastas gerados pelo Maven
+/target/
+**/target/
+
+# Ignora arquivos de configuração do IDE
+/.idea/
+*.iml
+*.ipr
+*.iws
+
+# Ignora arquivos do VSCode
+.vscode/
+
+# Ignora arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignora logs
+*.log
