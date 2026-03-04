@@ -27,13 +27,17 @@ class ProcessPaymentServiceTest {
     private StubOrderRepository repository;
     private SpyPaymentGateway pixGateway;
     private SpyPaymentGateway cardGateway;
+    private MockMessageBroker messageBroker; // O seu Mock
 
     @BeforeEach
     void setUp() {
         repository = new StubOrderRepository();
         pixGateway = new SpyPaymentGateway("PIX", true);
         cardGateway = new SpyPaymentGateway("CREDIT_CARD", true);
-        service = new ProcessPaymentService(repository, List.of(pixGateway, cardGateway));
+        messageBroker = new MockMessageBroker(); // Instanciando o Mock
+        
+        // Passando o Mock como 3º parâmetro
+        service = new ProcessPaymentService(repository, List.of(pixGateway, cardGateway), messageBroker);
     }
 
     private Order createConfirmedOrder() {
@@ -55,6 +59,9 @@ class ProcessPaymentServiceTest {
         assertEquals(OrderStatus.PAID, result.getStatus());
         assertEquals("PIX", result.getPaymentMethod());
         assertTrue(pixGateway.wasCalled());
+        
+        // Bônus: garante que o SAGA publicou o evento de sucesso!
+        assertTrue(messageBroker.eventPublished);
     }
 
     @Test
@@ -88,16 +95,22 @@ class ProcessPaymentServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção quando pagamento é recusado")
+    @DisplayName("Deve lançar exceção quando pagamento é recusado e acionar Rollback do SAGA")
     void shouldThrowWhenPaymentDeclined() {
         repository = new StubOrderRepository();
         var failingGateway = new SpyPaymentGateway("PIX", false);
-        service = new ProcessPaymentService(repository, List.of(failingGateway));
+        messageBroker = new MockMessageBroker(); // Reinstanciando o Mock para este contexto isolado
+        
+        // Passando o Mock como 3º parâmetro
+        service = new ProcessPaymentService(repository, List.of(failingGateway), messageBroker);
 
         Order order = createConfirmedOrder();
         var command = new ProcessPaymentCommand(order.getId(), "PIX");
 
         assertThrows(RuntimeException.class, () -> service.execute(command));
+        
+        // Bônus da sua entrega: garante que o evento SAGA de rollback foi disparado!
+        assertTrue(messageBroker.eventPublished);
     }
 
     // --- Stubs / Spies ---
@@ -140,6 +153,18 @@ class ProcessPaymentServiceTest {
 
         boolean wasCalled() {
             return called;
+        }
+    }
+
+    // --- Mock do Kafka (SAGA) ---
+    static class MockMessageBroker implements com.eventmaster.sales.application.port.out.MessageBrokerPort {
+        public boolean eventPublished = false;
+        public Object lastPayload = null;
+
+        @Override
+        public void publishEvent(String topic, Object eventPayload) {
+            this.eventPublished = true;
+            this.lastPayload = eventPayload;
         }
     }
 }
