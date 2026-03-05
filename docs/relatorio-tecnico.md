@@ -32,7 +32,7 @@ No modelo original de desenvolvimento, todos os módulos eram fortemente acoplad
 A nova estrutura incorpora instâncias separadas e independentes utilizando um Gateway como única porta de entrada.
 
 <div align="center">
-  <img src="./papartefatos-papeisel1/microsservicos.drawio.svg" alt="Arquitetura de Microsserviços" width="600">
+  <img src="./artefatos-papeis/microsservicos.drawio.svg" alt="Arquitetura de Microsserviços" width="600">
 </div>
 
 Três componentes críticos são desenhados para a sustentação e escalabilidade:
