@@ -25,14 +25,14 @@ A migração utiliza o **Padrão de Estrangulamento (Strangler Fig Pattern)** pa
 No modelo original de desenvolvimento, todos os módulos eram fortemente acoplados, partilhando o mesmo tempo de execução e base de dados. Um pico no acesso de ingressos poderia afetar as consultas de relatórios simultaneamente, causando indisponibilidade geral da plataforma.
 
 <div align="center">
-  <img src="./papel1/monolitica.drawio%201.svg" alt="Arquitetura Monolítica" width="500">
+  <img src="./artefatos-papeis/monolitica.drawio%201.svg" alt="Arquitetura Monolítica" width="500">
 </div>
 
 ### 1.2 Nova Arquitetura de Microsserviços
 A nova estrutura incorpora instâncias separadas e independentes utilizando um Gateway como única porta de entrada.
 
 <div align="center">
-  <img src="./papel1/microsservicos.drawio.svg" alt="Arquitetura de Microsserviços" width="600">
+  <img src="./papartefatos-papeisel1/microsservicos.drawio.svg" alt="Arquitetura de Microsserviços" width="600">
 </div>
 
 Três componentes críticos são desenhados para a sustentação e escalabilidade:
@@ -44,7 +44,7 @@ Três componentes críticos são desenhados para a sustentação e escalabilidad
 O API Gateway funciona também como o Authorization Server que regula a emissão e validação.
 
 <div align="center">
-  <img src="./papel1/autentica.svg" alt="Fluxo de Autenticação OAuth 2.0" width="700">
+  <img src="./artefatos-papeis/autentica.svg" alt="Fluxo de Autenticação OAuth 2.0" width="700">
 </div>
 
 ### 1.4 Segurança por Design (OWASP Top 10)
