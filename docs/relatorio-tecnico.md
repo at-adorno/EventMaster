@@ -1,6 +1,6 @@
 # EventMaster: Relatório Técnico
 
-## Resumo Executivo
+## Resumo
 O projeto **EventMaster** visa a transição de um sistema de venda de ingressos monolítico para uma arquitetura de microsserviços. Essa evolução busca solucionar problemas críticos de latência durante picos de acesso, inconsistência na base de dados de ingressos e vulnerabilidades de segurança (injeção de dados). O projeto foi desenhado sob os princípios de Arquitetura Limpa, Domain-Driven Design (DDD) e padrões de resiliência e sistemas distribuídos.
 
 Como prova de conceito (PoC) da nova arquitetura, este repositório contém o esqueleto arquitetural das camadas de domínio e aplicação e a implementação completa do microsserviço de Vendas e Pagamentos (`sales-service`).

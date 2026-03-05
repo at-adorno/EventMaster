@@ -1,70 +1,73 @@
-# EventMaster — Sistema de Gestão de Eventos (Microsserviço de Vendas)
+# EventMaster — Sistema de Gestão de Eventos
 
-Este repositório contém o esqueleto do microsserviço de **Vendas/Pagamentos** do sistema EventMaster, seguindo Clean Architecture, DDD e princípios SOLID.
+Este repositório contém o esqueleto do microsserviço de **Vendas e Pagamentos** do sistema EventMaster. O projeto foi desenhado sob os preceitos de **Clean Architecture**, **Domain-Driven Design (DDD)** e **Sistemas Distribuídos** (Padrão SAGA e Circuit Breaker).
 
-## Visão Geral
-- **Tecnologia:** Java 21, Spring Boot 3, Maven
-- **Arquitetura:** Clean Architecture (Domain, Application, Infrastructure)
-- **Padrão GoF:** Strategy para métodos de pagamento
-- **Testes:** TDD, cobertura unitária completa
+A documentação completa das decisões arquiteturais tomadas pelo grupo encontra-se em:
+[Relatório Técnico](docs/relatorio-tecnico.md)
 
-## Estrutura de Pastas
+---
+
+## Tecnologias Utilizadas
+- **Linguagem / Framework:** Java 21, Spring Boot 3
+- **Mensageria (Eventos SAGA):** Apache Kafka via Docker
+- **Resiliência:** Resilience4j (Circuit Breaker)
+- **Testes:** JUnit 5, Mockito, Cucumber (BDD)
+
+---
+
+## Como Executar o Projeto
+
+### 1. Subir a Infraestrutura (Kafka e Zookeeper)
+O microsserviço depende do Kafka para processamento de filas e eventos de compensação (Rollback SAGA).
+```bash
+docker-compose up -d
 ```
-sales-service/
-├── src/main/java/com/eventmaster/sales/
-│   ├── domain/entity/         # Entidades e regras de negócio
-│   ├── application/port/in/   # Portas de entrada (casos de uso)
-│   ├── application/port/out/  # Portas de saída (interfaces de infraestrutura)
-│   ├── application/service/   # Implementações dos casos de uso
-│   └── infrastructure/adapter/# Adaptadores (REST, persistência, pagamentos)
-│
-├── src/test/java/com/eventmaster/sales/ # Testes unitários (TDD)
-└── pom.xml
+*(Para verificar se estão rodando, use `docker ps`)*
+
+### 2. Rodar os Testes (Validação 100% Funcional)
+A aplicação possui cobertura completa das regras de negócio (TDD) e testes de comportamento de integração (BDD).
+```bash
+cd sales-service
+mvn clean test
 ```
+*Garantia: Todos os cenários de compra, transição estrita de status, cálculos de taxas e estornos via Mock Kafka passarão com sucesso.*
 
-## Como rodar
-1. **Pré-requisitos:** Java 21, Maven 3.8+
-2. **Build e testes:**
-   ```sh
-   cd sales-service
-   mvn clean test
-   ```
-3. **Executar localmente:**
-   ```sh
-   mvn spring-boot:run
-   ```
-4. **APIs disponíveis:**
-   - `POST /api/orders` — cria pedido de ingressos
-   - `POST /api/orders/pay` — processa pagamento (PIX, CREDIT_CARD, BOLETO)
+### 3. Executar o Microsserviço Localmente
+Com o Kafka rodando via Docker, inicie o Spring Boot:
+```bash
+cd sales-service
+mvn spring-boot:run
+```
+O servidor estará rodando em `http://localhost:8080`.
 
-## Exemplos de Requisição
-### Criar Pedido
-```json
-POST /api/orders
-{
-  "customerId": "cliente-123",
+---
+
+## Testando a API (Exemplos via cURL)
+
+**1. Criar um Pedido**
+Reserva os ingressos e cria a *Order* no status `CREATED` ou `CONFIRMED`.
+```bash
+curl -s -X POST http://localhost:8080/api/orders \
+-H "Content-Type: application/json" \
+-d '{ 
+  "customerId": "cliente-01", 
   "items": [
-    { "eventId": "evento-1", "ticketType": "VIP", "unitPrice": 100.0, "quantity": 2 }
-  ]
-}
+    {"eventId": "evento-x", "ticketType": "VIP", "unitPrice": 100, "quantity": 2}
+  ] 
+}'
 ```
 
-### Pagar Pedido
-```json
-POST /api/orders/pay
-{
-  "orderId": "<id do pedido>",
+*(Pegue o `id` gerado na resposta para usar no próximo passo)*
+
+**2. Pagar o Pedido**
+Métodos disponíveis: `PIX`, `BOLETO` ou `CREDIT_CARD`.
+```bash
+curl -s -X POST http://localhost:8080/api/orders/pay \
+-H "Content-Type: application/json" \
+-d '{
+  "orderId": "<COLE-O-ID-AQUI>", 
   "paymentMethod": "PIX"
-}
+}'
 ```
 
-## Testes
-- Todos os testes unitários podem ser executados com `mvn test`.
-- Cobertura de regras de negócio, transições de estado e seleção de strategy.
-
-## Documentação
-- Relatório técnico detalhado: [`docs/relatorio-tecnico-papel2.md`](docs/relatorio-tecnico-papel2.md)
-
-## Próximos Passos
-- Integração com API Gateway, autenticação e mensageria (outros papéis do projeto)
-- Persistência real (JPA/MongoDB) e gateways de pagamento reais
+*(Nota: Tentar pagar via `CREDIT_CARD` várias vezes seguidas acionará o Circuit Breaker simulado, testando a resiliência).*
