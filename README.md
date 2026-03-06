@@ -1,6 +1,7 @@
 # EventMaster — Sistema de Gestão de Eventos
 
 Este repositório contém o esqueleto do microsserviço de **Vendas e Pagamentos** do sistema EventMaster. O projeto foi desenhado sob os preceitos de **Clean Architecture**, **Domain-Driven Design (DDD)** e **Sistemas Distribuídos** (Padrão SAGA e Circuit Breaker).
+Elaborado pelos alunos: André, Fabrício e Willy.
 
 A documentação completa das decisões arquiteturais tomadas pelo grupo encontra-se em:
 [Relatório Técnico](docs/relatorio-tecnico.md)
